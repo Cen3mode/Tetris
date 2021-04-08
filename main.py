@@ -8,7 +8,7 @@ height = 512
 class Tetris:
     def __init__(self):
 
-        self.currentBlock = []
+        self.currentBlock = [3,0,[]]
 
         self.running = True
 
@@ -39,19 +39,19 @@ class Tetris:
                           [0,0,0,0,0,0,0,0,0,0]]
 
     def selectRandomBlock(self):
-        self.currentBlock = blockSet[randint(0, len(blockSet)-1)]
+        self.currentBlock[2] = blockSet[randint(0, len(blockSet)-1)]
 
-    def spawnBlock(self, block):
-        for i in range(len(block)):
-            for j in range(len(block[i])):
-                self.blockGrid[i][j+3] = block[i][j]
+    def pushBlockToMatrix(self):
+        for i in range(len(self.currentBlock[2])):
+            for j in range(len(self.currentBlock[2][i])):
+                self.blockGrid[i][j+self.currentBlock[0]] = self.currentBlock[2][i][j]
 
     def draw(self):
         self.screen.fill(0)
         for row in range(len(self.blockGrid)):
             for point in range(len(self.blockGrid[row])):
                 if(self.blockGrid[row][point] == 1):
-                    pygame.draw.rect(self.screen, 255 ,pygame.Rect(128+(height/len(self.blockGrid))*point, (height/len(self.blockGrid))*row, (height/len(self.blockGrid)), (height/len(self.blockGrid))))
+                    pygame.draw.rect(self.screen, 255 ,pygame.Rect((height/len(self.blockGrid))*5+(height/len(self.blockGrid))*point, (height/len(self.blockGrid))*row, (height/len(self.blockGrid)), (height/len(self.blockGrid))))
         pygame.display.flip()
 
     def update(self):
@@ -63,7 +63,7 @@ class Tetris:
 
     def run(self):
         self.selectRandomBlock()
-        self.spawnBlock(self.currentBlock)
+        self.pushBlockToMatrix()
         while self.running:
             self.update()
             self.draw()            
