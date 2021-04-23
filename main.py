@@ -49,19 +49,21 @@ class Tetris:
                           [1,1,1,1,1,1,1,1,1,1]]
 
     def selectRandomBlock(self):
+        self.currentBlock[0] = 3
+        self.currentBlock[1] = 0
         self.currentBlock[2] = blockSet[randint(0, len(blockSet)-1)]
 
     def drawCurrentBlock(self):
         for row in range(len(self.currentBlock[2])):
             for point in range(len(self.currentBlock[2][row])):
                 if(self.currentBlock[2][row][point] == 1):
-                    pygame.draw.rect(self.screen, 255 ,pygame.Rect(((height/len(self.blockGrid))*5)+(height/len(self.blockGrid))*(point+self.currentBlock[0]), (height/len(self.blockGrid))*(row+self.currentBlock[1]), (height/len(self.blockGrid)), (height/len(self.blockGrid))))
+                    pygame.draw.rect(self.screen, 255 ,pygame.Rect(((height/len(self.blockGrid)-1)*5)+(height/len(self.blockGrid)-1)*(point+self.currentBlock[0]), (height/len(self.blockGrid)-1)*(row+self.currentBlock[1]), (height/len(self.blockGrid)-1), (height/len(self.blockGrid)-1)))
 
     def checkBlockCollision(self):
         for blockRow in range(len(self.currentBlock[2])):
             for blockColumn in range(len(self.currentBlock[2][blockRow])):
                 if(self.currentBlock[2][blockRow][blockColumn] == 1):
-                    if(self.blockGrid[blockRow+1+self.currentBlock[1]][blockColumn+self.currentBlock[0]]):
+                    if(self.blockGrid[blockRow+1+self.currentBlock[1]][blockColumn+self.currentBlock[0]] == 1):
                         self.pushBlockToMatrix()
                         self.selectRandomBlock()
 
@@ -71,7 +73,8 @@ class Tetris:
     def pushBlockToMatrix(self):
         for i in range(len(self.currentBlock[2])):
             for j in range(len(self.currentBlock[2][i])):
-                self.blockGrid[i][j+self.currentBlock[0]] = self.currentBlock[2][i][j]
+                if(self.currentBlock[2][i][j] == 1 ):
+                    self.blockGrid[i+self.currentBlock[1]][j+self.currentBlock[0]] = self.currentBlock[2][i][j]
 
     def draw(self):
         self.screen.fill(0)
