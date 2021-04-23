@@ -45,7 +45,8 @@ class Tetris:
                           [0,0,0,0,0,0,0,0,0,0],
                           [0,0,0,0,0,0,0,0,0,0],
                           [0,0,0,0,0,0,0,0,0,0],
-                          [0,0,0,0,0,0,0,0,0,0]]
+                          [0,0,0,0,0,0,0,0,0,0],
+                          [1,1,1,1,1,1,1,1,1,1]]
 
     def selectRandomBlock(self):
         self.currentBlock[2] = blockSet[randint(0, len(blockSet)-1)]
@@ -55,6 +56,14 @@ class Tetris:
             for point in range(len(self.currentBlock[2][row])):
                 if(self.currentBlock[2][row][point] == 1):
                     pygame.draw.rect(self.screen, 255 ,pygame.Rect(((height/len(self.blockGrid))*5)+(height/len(self.blockGrid))*(point+self.currentBlock[0]), (height/len(self.blockGrid))*(row+self.currentBlock[1]), (height/len(self.blockGrid)), (height/len(self.blockGrid))))
+
+    def checkBlockCollision(self):
+        for blockRow in range(len(self.currentBlock[2])):
+            for blockColumn in range(len(self.currentBlock[2][blockRow])):
+                if(self.currentBlock[2][blockRow][blockColumn] == 1):
+                    if(self.blockGrid[blockRow+1+self.currentBlock[1]][blockColumn+self.currentBlock[0]]):
+                        self.pushBlockToMatrix()
+                        self.selectRandomBlock()
 
     def moveCurrentBlock(self):
         self.currentBlock[1] += 1
@@ -66,15 +75,16 @@ class Tetris:
 
     def draw(self):
         self.screen.fill(0)
-        for row in range(len(self.blockGrid)):
+        for row in range(len(self.blockGrid)-1):
             for point in range(len(self.blockGrid[row])):
                 if(self.blockGrid[row][point] == 1):
-                    pygame.draw.rect(self.screen, 255 ,pygame.Rect((height/len(self.blockGrid))*5+(height/len(self.blockGrid))*point, (height/len(self.blockGrid))*row, (height/len(self.blockGrid)), (height/len(self.blockGrid))))
+                    pygame.draw.rect(self.screen, 255 ,pygame.Rect((height/len(self.blockGrid)-1)*5+(height/len(self.blockGrid)-1)*point, (height/len(self.blockGrid)-1)*row, (height/len(self.blockGrid)-1), (height/len(self.blockGrid)-1)))
         self.drawCurrentBlock()
         pygame.display.flip()
 
     def update(self):
         self.rowTimeCntr += self.clock.tick(frameRate)
+        self.checkBlockCollision()
         if(self.rowTimeCntr > self.blockFallingInterval):
             self.moveCurrentBlock()
             self.rowTimeCntr = 0
@@ -86,6 +96,11 @@ class Tetris:
                     self.currentBlock[0] -= 1
                 if event.key == pygame.K_RIGHT:
                     self.currentBlock[0] += 1
+                if event.key == pygame.K_DOWN :
+                    self.blockFallingInterval = 10
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_DOWN :
+                    self.blockFallingInterval = 1000
 
     def run(self):
         self.selectRandomBlock()
