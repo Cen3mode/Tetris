@@ -1,13 +1,16 @@
 import pygame
+from pygame.locals import *
 from random import randint
 from blocks import *
-import time
+import time, math
 from copy import deepcopy
 
 width = 512
 height = 512
 
 frameRate = 60
+
+scorePerLine = [40, 100, 300, 1200]
 
 class Tetris:
     def __init__(self):
@@ -19,13 +22,23 @@ class Tetris:
         pygame.init()
         pygame.display.set_caption("Tetris")
 
+        pygame.font.init()
+        self.myfont = pygame.font.SysFont('Comic Sans MS', 30)
+
         self.screen = pygame.display.set_mode((width, height))
         self.clock = pygame.time.Clock()
 
         self.dt = self.clock.tick(frameRate)
         self.rowTimeCntr = 0
 
-        self.blockFallingInterval = 1000
+        self.level = 0
+        self.score = 0
+
+        self.fall = False
+
+        self.linesBroken = 0
+
+        self.blockFallingInterval = fallSpeed[self.level]
 
         self.blockGrid = [[1,0,0,0,0,0,0,0,0,0,0,1],
                           [1,0,0,0,0,0,0,0,0,0,0,1],
@@ -55,10 +68,16 @@ class Tetris:
         self.blockGrid[0] = 1,0,0,0,0,0,0,0,0,0,0,1
 
     def checkIfRowMade(self) :
+        rowsCompleted = 0
         for row in range(len(self.blockGrid)-1) :
-            if all(self.blockGrid[row][1:-2]) != 0 :
+            if all(self.blockGrid[row][1:-1]) != 0 :
                 self.blockGrid[row][1:-1] = 0,0,0,0,0,0,0,0,0,0
                 self.moveDown(row)
+                rowsCompleted += 1
+                self.linesBroken += 1 
+        if rowsCompleted != 0 :
+            self.score += scorePerLine[rowsCompleted] * (self.level + 1)
+
 
     def rotateBlock(self):
         A = deepcopy(self.currentBlock)
@@ -74,9 +93,10 @@ class Tetris:
             self.currentBlock = A
 
     def selectRandomBlock(self):
+        block = randint(0, len(blockSet)-1)
         self.currentBlock[0] = 3
-        self.currentBlock[1] = 0
-        self.currentBlock[2] = blockSet[randint(0, len(blockSet)-1)]
+        self.currentBlock[1] = 0 + startOffsetTable[block]
+        self.currentBlock[2] = blockSet[block]
 
     def drawCurrentBlock(self):
         for row in range(len(self.currentBlock[2])):
@@ -130,12 +150,19 @@ class Tetris:
                 if(self.blockGrid[row][point] != 0):
                     pygame.draw.rect(self.screen, colorTable[self.blockGrid[row][point]] ,pygame.Rect((height/len(self.blockGrid)-1)*5+(height/len(self.blockGrid)-1)*point, (height/len(self.blockGrid)-1)*row, (height/len(self.blockGrid)-1), (height/len(self.blockGrid)-1)))
         self.drawCurrentBlock()
+        self.screen.blit(self.myfont.render("Score: {}".format(self.score), False, (255, 255, 255)), (0, 0))
+        self.screen.blit(self.myfont.render("Level: {}".format(self.level), False, (255, 255, 255)), (0, 20))
         pygame.display.flip()
 
     def update(self):
         self.rowTimeCntr += self.clock.tick(frameRate)
         self.checkBlockCollision()
         self.checkIfRowMade()
+        self.level =  int(math.floor(self.linesBroken/10))
+        if self.fall :
+            self.blockFallingInterval = fallSpeed[self.level]/100
+        else :
+            self.blockFallingInterval = fallSpeed[self.level]
         if(self.rowTimeCntr > self.blockFallingInterval):
             self.moveCurrentBlock()
             self.rowTimeCntr = 0
@@ -148,13 +175,12 @@ class Tetris:
                 if event.key == pygame.K_RIGHT and self.checkBlockCollisionRight():
                     self.currentBlock[0] += 1
                 if event.key == pygame.K_s :
-                    self.blockFallingInterval = 10
+                    self.fall = True
                 if event.key == pygame.K_a :
                     self.rotateBlock()
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_s :
-                    self.blockFallingInterval = 1000
-
+                    self.fall = False
     def run(self):
         self.selectRandomBlock()
         #self.pushBlockToMatrix()
