@@ -15,6 +15,8 @@ scorePerLine = [40, 100, 300, 1200]
 class Tetris:
     def __init__(self):
 
+        self.game_state = 0
+
         self.currentBlock = [3,0,[]]
 
         self.running = True
@@ -78,6 +80,10 @@ class Tetris:
         if rowsCompleted != 0 :
             self.score += scorePerLine[rowsCompleted] * (self.level + 1)
 
+    def checkIfLost(self) :
+        for point in self.blockGrid[0][1:-1] :
+            if point != 0 :
+                self.game_state = 2
 
     def rotateBlock(self):
         A = deepcopy(self.currentBlock)
@@ -158,6 +164,7 @@ class Tetris:
         self.rowTimeCntr += self.clock.tick(frameRate)
         self.checkBlockCollision()
         self.checkIfRowMade()
+        self.checkIfLost()
         self.level =  int(math.floor(self.linesBroken/10))
         if self.fall :
             self.blockFallingInterval = fallSpeed[self.level]/100
@@ -168,7 +175,7 @@ class Tetris:
             self.rowTimeCntr = 0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                self.running = False
+                quit()
             if event.type == pygame.KEYDOWN :
                 if event.key == pygame.K_LEFT and self.checkBlockCollisionLeft():
                     self.currentBlock[0] -= 1
@@ -181,12 +188,66 @@ class Tetris:
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_s :
                     self.fall = False
+
+    def game_menu(self) :
+        while self.game_state == 0 :
+            self.screen.fill(0)
+            self.screen.blit(self.myfont.render("Press [S] to start", True, (255, 255, 255)), (width / 2, height / 2))
+            for event in pygame.event.get() :
+                if event.type == pygame.QUIT:
+                    quit()
+                if event.type == pygame.KEYDOWN :
+                    if event.key == pygame.K_s :
+                        self.game_state = 1
+            pygame.display.flip()
+
+    def game(self) :
+        self.blockGrid = [[1,0,0,0,0,0,0,0,0,0,0,1],
+                          [1,0,0,0,0,0,0,0,0,0,0,1],
+                          [1,0,0,0,0,0,0,0,0,0,0,1],
+                          [1,0,0,0,0,0,0,0,0,0,0,1],
+                          [1,0,0,0,0,0,0,0,0,0,0,1],
+                          [1,0,0,0,0,0,0,0,0,0,0,1],
+                          [1,0,0,0,0,0,0,0,0,0,0,1],
+                          [1,0,0,0,0,0,0,0,0,0,0,1],
+                          [1,0,0,0,0,0,0,0,0,0,0,1],
+                          [1,0,0,0,0,0,0,0,0,0,0,1],
+                          [1,0,0,0,0,0,0,0,0,0,0,1],
+                          [1,0,0,0,0,0,0,0,0,0,0,1],
+                          [1,0,0,0,0,0,0,0,0,0,0,1],
+                          [1,0,0,0,0,0,0,0,0,0,0,1],
+                          [1,0,0,0,0,0,0,0,0,0,0,1],
+                          [1,0,0,0,0,0,0,0,0,0,0,1],
+                          [1,0,0,0,0,0,0,0,0,0,0,1],
+                          [1,0,0,0,0,0,0,0,0,0,0,1],
+                          [1,0,0,0,0,0,0,0,0,0,0,1],
+                          [1,0,0,0,0,0,0,0,0,0,0,1],
+                          [1,1,1,1,1,1,1,1,1,1,1,1]]
+        while self.game_state == 1 :
+            self.update()
+            self.draw() 
+
+    def lost_screen(self) :
+        while self.game_state == 2 :
+            self.screen.fill(0)
+            self.screen.blit(self.myfont.render("You have lost press [S] to return to menu", True, (255, 255, 255)), (width / 2, height / 2))
+            for event in pygame.event.get() :
+                if event.type == pygame.QUIT:
+                    quit()
+                if event.type == pygame.KEYDOWN :
+                    if event.key == pygame.K_s :
+                        self.game_state = 0
+            pygame.display.flip()
+
+
     def run(self):
         self.selectRandomBlock()
         #self.pushBlockToMatrix()
         while self.running:
-            self.update()
-            self.draw()            
+            self.game_menu()
+            self.game()
+            self.lost_screen()
+                       
 
 game = Tetris()
 game.run()
