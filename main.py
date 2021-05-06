@@ -17,6 +17,30 @@ class Tetris:
 
         self.game_state = 0
 
+        self.blockGrid = [[1,0,0,0,0,0,0,0,0,0,0,1],
+                        [1,0,0,0,0,0,0,0,0,0,0,1],
+                        [1,0,0,0,0,0,0,0,0,0,0,1],
+                        [1,0,0,0,0,0,0,0,0,0,0,1],
+                        [1,0,0,0,0,0,0,0,0,0,0,1],
+                        [1,0,0,0,0,0,0,0,0,0,0,1],
+                        [1,0,0,0,0,0,0,0,0,0,0,1],
+                        [1,0,0,0,0,0,0,0,0,0,0,1],
+                        [1,0,0,0,0,0,0,0,0,0,0,1],
+                        [1,0,0,0,0,0,0,0,0,0,0,1],
+                        [1,0,0,0,0,0,0,0,0,0,0,1],
+                        [1,0,0,0,0,0,0,0,0,0,0,1],
+                        [1,0,0,0,0,0,0,0,0,0,0,1],
+                        [1,0,0,0,0,0,0,0,0,0,0,1],
+                        [1,0,0,0,0,0,0,0,0,0,0,1],
+                        [1,0,0,0,0,0,0,0,0,0,0,1],
+                        [1,0,0,0,0,0,0,0,0,0,0,1],
+                        [1,0,0,0,0,0,0,0,0,0,0,1],
+                        [1,0,0,0,0,0,0,0,0,0,0,1],
+                        [1,0,0,0,0,0,0,0,0,0,0,1],
+                        [1,1,1,1,1,1,1,1,1,1,1,1]]
+
+
+        self.block_size = (height/len(self.blockGrid)-1)
         self.currentBlock = [3,0,[]]
 
         self.running = True
@@ -42,38 +66,16 @@ class Tetris:
 
         self.blockFallingInterval = fallSpeed[self.level]
 
-        self.blockGrid = [[1,0,0,0,0,0,0,0,0,0,0,1],
-                          [1,0,0,0,0,0,0,0,0,0,0,1],
-                          [1,0,0,0,0,0,0,0,0,0,0,1],
-                          [1,0,0,0,0,0,0,0,0,0,0,1],
-                          [1,0,0,0,0,0,0,0,0,0,0,1],
-                          [1,0,0,0,0,0,0,0,0,0,0,1],
-                          [1,0,0,0,0,0,0,0,0,0,0,1],
-                          [1,0,0,0,0,0,0,0,0,0,0,1],
-                          [1,0,0,0,0,0,0,0,0,0,0,1],
-                          [1,0,0,0,0,0,0,0,0,0,0,1],
-                          [1,0,0,0,0,0,0,0,0,0,0,1],
-                          [1,0,0,0,0,0,0,0,0,0,0,1],
-                          [1,0,0,0,0,0,0,0,0,0,0,1],
-                          [1,0,0,0,0,0,0,0,0,0,0,1],
-                          [1,0,0,0,0,0,0,0,0,0,0,1],
-                          [1,0,0,0,0,0,0,0,0,0,0,1],
-                          [1,0,0,0,0,0,0,0,0,0,0,1],
-                          [1,0,0,0,0,0,0,0,0,0,0,1],
-                          [1,0,0,0,0,0,0,0,0,0,0,1],
-                          [1,0,0,0,0,0,0,0,0,0,0,1],
-                          [1,1,1,1,1,1,1,1,1,1,1,1]]
-
     def moveDown(self, dropRow) :
         for row in range(dropRow, 1, -1) :
             self.blockGrid[row] = self.blockGrid[row-1]
-        self.blockGrid[0] = 1,0,0,0,0,0,0,0,0,0,0,1
+        self.blockGrid[0] = [1,0,0,0,0,0,0,0,0,0,0,1]
 
     def checkIfRowMade(self) :
         rowsCompleted = 0
         for row in range(len(self.blockGrid)-1) :
             if all(self.blockGrid[row][1:-1]) != 0 :
-                self.blockGrid[row][1:-1] = 0,0,0,0,0,0,0,0,0,0
+                self.blockGrid[row][1:-1] = [0,0,0,0,0,0,0,0,0,0]
                 self.moveDown(row)
                 rowsCompleted += 1
                 self.linesBroken += 1 
@@ -108,7 +110,13 @@ class Tetris:
         for row in range(len(self.currentBlock[2])):
             for point in range(len(self.currentBlock[2][row])):
                 if(self.currentBlock[2][row][point] != 0):
-                    pygame.draw.rect(self.screen, colorTable[self.currentBlock[2][row][point]] ,pygame.Rect(((height/len(self.blockGrid)-1)*5)+(height/len(self.blockGrid)-1)*(point+self.currentBlock[0]), (height/len(self.blockGrid)-1)*(row+self.currentBlock[1]), (height/len(self.blockGrid)-1), (height/len(self.blockGrid)-1)))
+                    pygame.draw.rect(self.screen, 
+                        colorTable[self.currentBlock[2][row][point]],
+                        pygame.Rect((self.block_size*5)+self.block_size*(point+self.currentBlock[0]), 
+                        self.block_size*(row+self.currentBlock[1]), 
+                        self.block_size, 
+                        self.block_size)
+                    )
 
     def blockIntersects(self, block) -> bool :
         for blockRow in range(len(block[2])):
@@ -242,7 +250,6 @@ class Tetris:
 
     def run(self):
         self.selectRandomBlock()
-        #self.pushBlockToMatrix()
         while self.running:
             self.game_menu()
             self.game()
