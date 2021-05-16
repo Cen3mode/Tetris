@@ -1,3 +1,8 @@
+class Block :
+    def __init__(self, block_color : int, block_offset : int, block : list) :
+        self.block_color = block_color
+        self.block_offset = block_offset
+
 block_0_color = 1
 block_0_offset = 0
 block_0 = [[0,block_0_color,0,0],
